@@ -1,7 +1,7 @@
+import argparse
 import hashlib
 import json
 import os
-import sys
 from datetime import datetime
 
 def generate_directory_hash(directory_path):
@@ -27,38 +27,39 @@ def generate_directory_hash(directory_path):
     return sha_hash.hexdigest()
 
 def create_stemp_file(path):
-    """Erstelle ein Stempel-File mit dem Hashwert und dem Datum."""
     hash_value = generate_directory_hash(path)
-    data = {
-        "hash": hash_value,
-        "date": datetime.now().isoformat()
-    }
-    with open("directory_stemp.json", "w") as file:
+    data = {"hash": hash_value, "date": datetime.now().isoformat()}
+    with open(os.path.join(path, "directory_stemp.json"), "w") as file:
         json.dump(data, file)
     print("Stempel-File erstellt.")
 
 def validate(path):
-    """Validiere den Hashwert des Pfades mit dem im Stempel-File."""
-    if not os.path.exists("directory_stemp.json"):
+    stemp_file_path = os.path.join(path, "directory_stemp.json")
+    if not os.path.exists(stemp_file_path):
         print("Stempel-File nicht gefunden.")
         return
 
-    with open("directory_stemp.json", "r") as file:
+    with open(stemp_file_path, "r") as file:
         stemp_data = json.load(file)
 
     current_hash = generate_directory_hash(path)
-
     if current_hash == stemp_data["hash"]:
         print("Validierung erfolgreich. Der Hashwert stimmt überein.")
     else:
         print("Validierung fehlgeschlagen. Der Hashwert stimmt nicht überein.")
 
 def main():
-    if "--stamp" in sys.argv:
-        # Nehmen Sie an, dass der Pfad das aktuelle Verzeichnis ist
-        create_stemp_file(os.getcwd())
-    elif "--validate" in sys.argv:
-        validate(os.getcwd())
+    parser = argparse.ArgumentParser(description='Erstellen und Validieren eines Directory-Stempels.')
+    parser.add_argument('path', type=str, help='Pfad des Verzeichnisses')
+    parser.add_argument('--stamp', action='store_true', help='Erstelle einen Stempel für das Verzeichnis')
+    parser.add_argument('--validate', action='store_true', help='Validiere das Verzeichnis')
+
+    args = parser.parse_args()
+
+    if args.stamp:
+        create_stemp_file(args.path)
+    elif args.validate:
+        validate(args.path)
     else:
         print("Bitte verwenden Sie --stamp oder --validate")
 
