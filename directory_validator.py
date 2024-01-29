@@ -30,9 +30,14 @@ def generate_directory_hash(directory_path):
     return sha_hash.hexdigest()
 
 def create_stemp_file(path):
+    stemp_file_path = os.path.join(path, "directory_stemp.json")
+    if os.path.exists(stemp_file_path):
+        print("Error: Stamp file already exists.")
+        exit(2)
+
     hash_value = generate_directory_hash(path)
     data = {"hash": hash_value, "date": datetime.now().isoformat()}
-    with open(os.path.join(path, "directory_stemp.json"), "w") as file:
+    with open(stemp_file_path, "w") as file:
         json.dump(data, file)
     print("Stamp file created.")
 
@@ -40,7 +45,7 @@ def validate(path):
     stemp_file_path = os.path.join(path, "directory_stemp.json")
     if not os.path.exists(stemp_file_path):
         print("Stamp file not found.")
-        return
+        exit(3)
 
     with open(stemp_file_path, "r") as file:
         stemp_data = json.load(file)
