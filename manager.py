@@ -1,55 +1,66 @@
-import argparse
-import subprocess
 import hashlib
 import json
+import os
+import sys
 from datetime import datetime
 
-def run_tree(level):
-    command = ["tree"]
-    if level is not None:
-        command += ["-L", str(level)]
-    return subprocess.check_output(command).decode()
+def generate_directory_hash(directory_path):
+    if not os.path.exists(directory_path):
+        return -1
 
-def hash_output(output):
-    return hashlib.sha256(output.encode()).hexdigest()
+    sha_hash = hashlib.sha256()
+    paths = []
 
-def create_json_file(hash_value, level, filename="directory_stemp.json"):
+    for root, dirs, files in os.walk(directory_path):
+        dirs.sort()
+        files.sort()
+        for name in dirs + files:
+            if root == directory_path and name == 'directory_stemp.json':
+                continue
+
+            rel_path = os.path.relpath(os.path.join(root, name), directory_path)
+            paths.append(rel_path)
+
+    for path in sorted(paths):
+        sha_hash.update(path.encode('utf-8'))
+
+    return sha_hash.hexdigest()
+
+def create_stemp_file(path):
+    """Erstelle ein Stempel-File mit dem Hashwert und dem Datum."""
+    hash_value = generate_directory_hash(path)
     data = {
         "hash": hash_value,
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "level": level if level is not None else 0
+        "date": datetime.now().isoformat()
     }
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=4)
+    with open("directory_stemp.json", "w") as file:
+        json.dump(data, file)
+    print("Stempel-File erstellt.")
 
-def validate_directory(level, expected_hash):
-    output = run_tree(level)
-    current_hash = hash_output(output)
-    return current_hash == expected_hash
+def validate(path):
+    """Validiere den Hashwert des Pfades mit dem im Stempel-File."""
+    if not os.path.exists("directory_stemp.json"):
+        print("Stempel-File nicht gefunden.")
+        return
+
+    with open("directory_stemp.json", "r") as file:
+        stemp_data = json.load(file)
+
+    current_hash = generate_directory_hash(path)
+
+    if current_hash == stemp_data["hash"]:
+        print("Validierung erfolgreich. Der Hashwert stimmt überein.")
+    else:
+        print("Validierung fehlgeschlagen. Der Hashwert stimmt nicht überein.")
 
 def main():
-    parser = argparse.ArgumentParser(description="Directory Structure Tool")
-    parser.add_argument("--level", type=int, help="Level of directory depth")
-    parser.add_argument("--file", action="store_true", help="Create a JSON file")
-    parser.add_argument("--stemp", action="store_true", help="Stamp the directory")
-    parser.add_argument("--validate", action="store_true", help="Validate directory")
-    parser.add_argument("--hash", help="Hash value for validation")
-
-    args = parser.parse_args()
-
-    if args.stemp:
-        output = run_tree(args.level)
-        hash_value = hash_output(output)
-        print(f"Directory Hash: {hash_value}")
-        if args.file:
-            create_json_file(hash_value, args.level)
-
-    if args.validate:
-        if args.hash is None:
-            print("Error: No hash value provided for validation.")
-        else:
-            is_valid = validate_directory(args.level, args.hash)
-            print("Directory is valid." if is_valid else "Directory is not valid.")
+    if "--stamp" in sys.argv:
+        # Nehmen Sie an, dass der Pfad das aktuelle Verzeichnis ist
+        create_stemp_file(os.getcwd())
+    elif "--validate" in sys.argv:
+        validate(os.getcwd())
+    else:
+        print("Bitte verwenden Sie --stamp oder --validate")
 
 if __name__ == "__main__":
     main()
