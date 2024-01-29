@@ -6,7 +6,6 @@ This Python script provides a simple yet effective way to create a stamp (a uniq
 
 - **Create Stamp**: Generate a unique hash for the entire directory, considering all files and subdirectories, except for the stamp file itself.
 - **Validate Directory**: Compare the current state of the directory against the stored hash value to detect any changes.
-- **Verbose Output**: Optional detailed output for more insights into the process.
 
 ## Usage
 
@@ -15,13 +14,13 @@ First, ensure you have Python installed on your system. Then, use the script fro
 To create a stamp for a directory:
 
 ```
-python directory_validator.py <path_to_directory> --stamp [--verbose]
+python directory_validator.py <path_to_directory> --stamp
 ```
 
 To validate a directory:
 
 ```
-python directory_validator.py <path_to_directory> --validate [--verbose]
+python directory_validator.py <path_to_directory> --validate
 ```
 
 ## How It Works
