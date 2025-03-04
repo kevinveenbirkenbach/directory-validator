@@ -1,47 +1,56 @@
-# Directory Validator
+# Directory Validator (dirval) 📂✅
 
-This Python script provides a simple yet effective way to create a stamp (a unique hash value) for a directory, which can then be used to validate the directory's contents later on. It's designed to detect any changes in the structure or contents of the directory.
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](./LICENSE) [![GitHub stars](https://img.shields.io/github/stars/kevinveenbirkenbach/directory-validator.svg?style=social)](https://github.com/kevinveenbirkenbach/directory-validator/stargazers)
 
-## Features
+Directory Validator is a Python utility that creates and verifies a unique hash stamp for an entire directory. This stamp, saved as a JSON file, represents the directory’s structure and content (excluding the stamp file itself), allowing you to quickly detect any changes.
 
-- **Create Stamp**: Generate a unique hash for the entire directory, considering all files and subdirectories, except for the stamp file itself.
-- **Validate Directory**: Compare the current state of the directory against the stored hash value to detect any changes.
+## 🛠 Features
 
-## Usage
+- **Stamp Creation:** Generate a unique SHA-256 hash for all files and subdirectories.
+- **Validation:** Recalculate the hash to determine if any files or directories have changed.
+- **Exclusion Handling:** Automatically ignores the stamp file and `.git` directories.
+- **Simple CLI Interface:** Easily create or validate stamps via command-line options.
 
-First, ensure you have Python installed on your system. Then, use the script from the command line as follows:
+## 📥 Installation
 
-To create a stamp for a directory:
+Install Directory Validator via [Kevin's Package Manager](https://github.com/kevinveenbirkenbach/package-manager) under the alias `dirval`:
 
-```
-python directory_validator.py <path_to_directory> --stamp
-```
-
-To validate a directory:
-
-```
-python directory_validator.py <path_to_directory> --validate
+```bash
+package-manager install dirval
 ```
 
-## How It Works
+This installs Directory Validator globally so you can use the command `dirval` in your terminal. 🚀
 
-- The script walks through the directory, generating a cumulative SHA-256 hash of all file and directory paths.
-- The generated hash, along with the current date and time, is stored in a file named `directory_stemp.json` within the directory.
-- For validation, the script recalculates the current directory's hash and compares it with the stored hash.
+## 🚀 Usage
 
-## Author
+### Create a Directory Stamp
 
-Kevin Veen-Birkenbach
-- Website: [veen.world](https://www.veen.world)
+Generate a stamp (hash and timestamp) for a directory. The stamp is saved as `directory_stemp.json` inside the directory.
 
-## Repository
+```bash
+dirval <path_to_directory> --stamp
+```
 
-This script is maintained at [GitHub](https://github.com/kevinveenbirkenbach/directory-validator).
+### Validate a Directory
 
-## Acknowledgments
+Compare the current directory state against the stored stamp to check for changes.
 
-This script was developed with the assistance of ChatGPT. You can find the conversation that led to this script [here](https://chat.openai.com/share/2ad61078-7190-42f7-8fd5-0d0440cd29db).
+```bash
+dirval <path_to_directory> --validate
+```
 
----
+## 📖 How It Works
 
-Feel free to contribute to this project or suggest improvements. For any issues or questions, please open an issue on the GitHub repository.
+- The script recursively walks through the given directory and collects all file and subdirectory paths (ignoring `.git` and the stamp file itself).
+- It sorts the paths and computes a cumulative SHA-256 hash.
+- The resulting hash, along with the current date and time, is stored in `directory_stemp.json`.
+- When validating, the current hash is generated and compared with the stored value.
+
+## 🧑‍💻 Author
+
+Developed by **Kevin Veen-Birkenbach**  
+- 🌐 [veen.world](https://www.veen.world)
+
+## 🤝 Contributions
+
+Contributions are welcome! Feel free to fork the repository, submit pull requests, or open issues if you have suggestions or run into any problems. Let's improve directory validation together! 😊
